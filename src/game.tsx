@@ -2,14 +2,14 @@ import React, { useEffect, useRef } from 'react';
 import './App.scss';
 
 // Constants
-const PLAYFIELD_WIDTH = 50;            // Number of columns in the grid (50)
-const PLAYFIELD_HEIGHT = 20;           // Number of rows in the grid (20)
-const BLOCK_SIZE = 30;                 // Size of each block (px)
-const CANVAS_WIDTH = PLAYFIELD_WIDTH * BLOCK_SIZE;  // 1500px (50 * 30)
+const PLAYFIELD_WIDTH = 10;            // Số cột trong lưới game (10)
+const PLAYFIELD_HEIGHT = 20;           // Số hàng trong lưới game (20)
+const BLOCK_SIZE = 30;                 // Kích thước mỗi ô (px)
+const CANVAS_WIDTH = PLAYFIELD_WIDTH * BLOCK_SIZE;  // 300px (10 * 30)
 const CANVAS_HEIGHT = PLAYFIELD_HEIGHT * BLOCK_SIZE; // 600px (20 * 30)
-const FALL_INTERVAL = 1000;            // Falling interval (ms)
+const FALL_INTERVAL = 1000;            // Thời gian rơi của khối (ms)
 
-// Tetromino shapes (each tetromino has 4 rotation states)
+// Tetromino shapes (mỗi tetromino có 4 trạng thái xoay)
 const TETROMINOES = [
   // I
   [
@@ -62,9 +62,9 @@ const TETROMINOES = [
   ]
 ];
 
-// Colors for each tetromino (index 0 = empty)
+// Colors for each tetromino (index 0 = trống)
 const COLORS = [
-  'black',  // 0: empty
+  'black',  // 0: ô trống
   'cyan',   // 1: I
   'yellow', // 2: O
   'purple', // 3: T
@@ -83,7 +83,7 @@ const Game: React.FC = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Initialize playfield with 0 (empty)
+    // Khởi tạo playfield với giá trị 0 (trống)
     let playfield = Array(PLAYFIELD_HEIGHT)
       .fill(undefined)
       .map(() => Array(PLAYFIELD_WIDTH).fill(0));
@@ -98,7 +98,7 @@ const Game: React.FC = () => {
     let lastTime = 0;
     let accumulatedTime = 0;
 
-    // Generate new tetromino and center it at the top of the playfield
+    // Tạo tetromino mới và căn giữa ở đầu playfield
     const generateNewTetromino = () => {
       const type = Math.floor(Math.random() * 7);
       const rotation = 0;
@@ -110,7 +110,7 @@ const Game: React.FC = () => {
       const y = 0;
       currentTetromino = { type, rotation, x, y };
 
-      // Check for immediate collision (game over)
+      // Kiểm tra va chạm ngay khi sinh (game over)
       for (const [dx, dy] of offsets) {
         const ny = y + dy;
         if (ny >= 0 && playfield[ny][x + dx] !== 0) {
@@ -120,7 +120,7 @@ const Game: React.FC = () => {
       }
     };
 
-    // Check if tetromino can move or rotate
+    // Kiểm tra xem tetromino có thể di chuyển hoặc xoay không
     const canMove = (dx: number, dy: number, newRotation: number = currentTetromino.rotation) => {
       const offsets = TETROMINOES[currentTetromino.type][newRotation];
       for (const [ox, oy] of offsets) {
@@ -168,19 +168,19 @@ const Game: React.FC = () => {
       generateNewTetromino();
     };
 
-    // Lock tetromino into the playfield
+    // Khóa tetromino vào playfield
     const lockTetromino = () => {
       const { type, rotation, x, y } = currentTetromino;
       const offsets = TETROMINOES[type][rotation];
       for (const [dx, dy] of offsets) {
         const ny = y + dy;
         if (ny >= 0) {
-          playfield[ny][x + dx] = type + 1; // +1 because COLORS starts at index 1 for tetrominoes
+          playfield[ny][x + dx] = type + 1; // +1 vì COLORS bắt đầu từ index 1 cho các tetromino
         }
       }
     };
 
-    // Clear full lines and update score
+    // Xóa các dòng đầy và cập nhật điểm số
     const clearLines = () => {
       let linesCleared = 0;
       for (let y = PLAYFIELD_HEIGHT - 1; y >= 0; y--) {
@@ -188,13 +188,13 @@ const Game: React.FC = () => {
           playfield.splice(y, 1);
           playfield.unshift(new Array(PLAYFIELD_WIDTH).fill(0));
           linesCleared++;
-          y++; // Adjust index after removal
+          y++; // Điều chỉnh chỉ số sau khi xóa dòng
         }
       }
       score += linesCleared;
     };
 
-    // Handle keyboard input
+    // Xử lý sự kiện bàn phím
     const handleInput = (event: KeyboardEvent) => {
       if (gameState === 'play') {
         switch (event.key) {
@@ -222,14 +222,14 @@ const Game: React.FC = () => {
       }
     };
 
-    // Draw the game interface with a modern, clean design
+    // Vẽ giao diện game với thiết kế hiện đại, sạch sẽ
     const draw = () => {
       if (!ctx) return;
-      // Draw playfield background
+      // Vẽ nền playfield
       ctx.fillStyle = "#111";
       ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-      // Draw subtle grid lines
+      // Vẽ lưới mờ
       ctx.strokeStyle = "#333";
       ctx.lineWidth = 1;
       for (let y = 0; y < PLAYFIELD_HEIGHT; y++) {
@@ -238,7 +238,7 @@ const Game: React.FC = () => {
         }
       }
 
-      // Draw locked blocks in the playfield
+      // Vẽ các khối đã khóa trong playfield
       for (let y = 0; y < PLAYFIELD_HEIGHT; y++) {
         for (let x = 0; x < PLAYFIELD_WIDTH; x++) {
           const cell = playfield[y][x];
@@ -249,7 +249,7 @@ const Game: React.FC = () => {
         }
       }
 
-      // Draw the current tetromino if the game is in play
+      // Vẽ tetromino hiện tại nếu game đang chơi
       if (gameState === 'play') {
         const { type, rotation, x, y } = currentTetromino;
         const offsets = TETROMINOES[type][rotation];
@@ -262,7 +262,7 @@ const Game: React.FC = () => {
         }
       }
 
-      // Draw game text (score and messages) with centered, clean typography
+      // Vẽ văn bản game (điểm và thông báo) với kiểu chữ trung tâm, sạch sẽ
       ctx.fillStyle = 'white';
       ctx.font = '24px Arial';
       ctx.textAlign = 'center';
